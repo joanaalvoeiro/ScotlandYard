@@ -15,13 +15,13 @@ class SearchProblem:
 
     def search(self, init, limitexp = 2000, limitdepth = 10, tickets =  [math.inf,math.inf,math.inf], anyorder = False):
         if len(self._goal) == 1 and tickets ==  [math.inf,math.inf,math.inf]:
-            final = search_1agent_nolim(init, self)
+            final = search_1agent_nolim(self, init)
 
         elif len(self._goal) == 1:
-            final = search_1agent_lim(init, tickets, self)
+            final = search_1agent_lim(self, init, tickets, limitexp, limitdepth)
 
         elif tickets == []:
-            final = search_3agent_nolim(init, self)
+            final = search_3agent_nolim(self, init, limitexp, limitdepth)
 
         elif anyorder:
             final = []
@@ -35,7 +35,7 @@ class SearchProblem:
 #
 # Exercise 1 - One agent, no tickets limmit
 #
-def search_1agent_nolim(init, self):
+def search_1agent_nolim(self, init, limitexp, limitdepth):
     #print("Map: {}".format(self._model))
 
     myMap = self._model
@@ -86,7 +86,7 @@ def search_1agent_nolim(init, self):
 def has_ticket(tickets, type):
     return tickets[type] > 0
 
-def search_1agent_lim(init, tickets, self):
+def search_1agent_lim(self, init, tickets, limitexp, limitdepth):
     myMap = self._model
     goal = self._goal[0]
 
@@ -141,7 +141,7 @@ def search_1agent_lim(init, tickets, self):
 #
 # Exercise 3 - Three agents, no tickets limmit
 #
-def search_3agent_nolim(init, self):
+def search_3agent_nolim(self, init, limitexp, limitdepth):
     myMap = self._model
     goals = self._goal
 
