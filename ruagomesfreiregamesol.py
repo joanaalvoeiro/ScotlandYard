@@ -13,8 +13,8 @@ class SearchProblem:
         self._auxheur = auxheur
         pass
 
-    def search(self, init, limitexp = 2000, limitdepth = 10, tickets = [], anyorder = False):
-        if len(self._goal) == 1 and tickets == []:
+    def search(self, init, limitexp = 2000, limitdepth = 10, tickets =  [math.inf,math.inf,math.inf], anyorder = False):
+        if len(self._goal) == 1 and tickets ==  [math.inf,math.inf,math.inf]:
             final = search_1agent_nolim(init, self)
 
         elif len(self._goal) == 1:
@@ -37,58 +37,40 @@ def has_ticket(tickets, type):
 def search_1agent_nolim(init, self):
     myMap = self._model
     goal = self._goal[0]
-    mapSize = len(myMap)
-    visited = set()
+
+    visited = [ False ] * len(myMap)
+
     transport = [[]]
+
     done = False
-
-    #print('goal is ' + str(goal))
-
     queue = [[init[0]]]
-
     while queue and not done:
-        currPath = queue.pop(0)
         currTrans = transport.pop(0)
+        currPath = queue.pop(0)
         currVertex = currPath[-1]
-        #print('visiting ' + str(currVertex))
 
-        if currVertex not in visited:
-            for i in myMap[currVertex]:
-                if i[1] == goal:
-                    done = True
-                    visited.add(i[1])
+        if currVertex == goal:
+            done = True
+            continue
 
-                    newPath = list(currPath)
-                    newPath.append(i[1])
+        if not visited[currVertex]:
+            for option in myMap[currVertex]:
 
-                    newTrans = list(currTrans)
-                    newTrans.append(i[0])
-                    #print('done w path ' + str(newPath))
-                    #print('transport: ' + str(newTrans))
-                    break
+                if visited[option[1]]: continue
 
-                newPath = list(currPath)
-                newPath.append(i[1])
+                newPath = currPath.copy()
+                newPath.append(option[1])
                 queue.append(newPath)
 
-                newTrans = list(currTrans)
-                newTrans.append(i[0])
+                newTrans = currTrans.copy()
+                newTrans.append(option[0])
                 transport.append(newTrans)
 
-        visited.add(currVertex)
-    
-    path = newPath[1:]
-    pathLen = len(path)
+            visited[currVertex] = True
 
-    final = [[[], init]]
+    final = [[[], init]] + [ [[T], [P]] for T, P in zip(currTrans, currPath[1:]) ]
 
-    i = 0
-
-    while ( i < pathLen):
-        final.append([[newTrans[i]], [path[i]]])
-        i += 1
-
-    #print(str(final))
+    #print("final: {}".format(final))
 
     return final
 
