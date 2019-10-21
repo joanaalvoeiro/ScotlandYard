@@ -1,3 +1,5 @@
+# 86752 Afonso Ribeiro - Joana Alvoeiro
+
 import math
 import pickle
 import time
@@ -11,15 +13,18 @@ class SearchProblem:
         self._auxheur = auxheur
         pass
 
-    def search(self, init, limitexp = 2000, limitdepth = 10, tickets = [math.inf,math.inf,math.inf]):
-        if len(self._goal) == 1 and tickets == [math.inf,math.inf,math.inf]:
+    def search(self, init, limitexp = 2000, limitdepth = 10, tickets = [], anyorder = False):
+        if len(self._goal) == 1 and tickets == []:
             final = search_1agent_nolim(init, self)
 
         elif len(self._goal) == 1:
             final = search_1agent_lim(init, tickets, self)
 
-        elif tickets == [math.inf,math.inf,math.inf]:
+        elif tickets == []:
             final = search_3agent_nolim(init, self)
+
+        elif anyorder:
+            final = []
 
         else:
             final = []
@@ -94,7 +99,7 @@ def search_1agent_lim(init, tickets, self):
     mapSize = len(myMap)
     myTickets = [tickets.copy()]
 
-    print(str(myMap))
+    #print(str(myMap))
 
     visited = set()
     queue = []
@@ -188,7 +193,7 @@ def search_3agent_nolim(init, self):
             currVertex = currPath[-1]
 
             if currVertex not in visited[agent]:
-                print(currVertex)
+                #print(currVertex)
                 for i in myMap[currVertex]:
 
 
@@ -204,14 +209,14 @@ def search_3agent_nolim(init, self):
 
                         finals[agent] = newPath
 
-                        print('done agent ' + str(agent) + ' with path ' + str(newPath))
+                        #print('done agent ' + str(agent) + ' with path ' + str(newPath))
                         #print('done w path ' + str(newPath))
                         #print('transport: ' + str(newTrans))
                         break
 
                     newPath = list(currPath)
                     newPath.append(i[1])
-                    print(newPath)
+                    #print(newPath)
                     queues[agent].append(newPath)
 
                     newTrans = list(currTrans)
