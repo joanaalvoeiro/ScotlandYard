@@ -13,40 +13,32 @@ class SearchProblem:
         self._auxheur = auxheur
         pass
 
-    def search(self, init, limitexp = 2000, limitdepth = 10, tickets =  [math.inf,math.inf,math.inf], anyorder = False):
+    def search(self, init, limitexp = 2000, limitdepth = 10, tickets = [math.inf,math.inf,math.inf], anyorder = False):
         if len(self._goal) == 1 and tickets ==  [math.inf,math.inf,math.inf]:
-            final = search_1agent_nolim(self, init)
+            return search_1agent_nolim(self, init, limitexp, limitdepth)
 
         elif len(self._goal) == 1:
-            final = search_1agent_lim(self, init, tickets, limitexp, limitdepth)
+            return search_1agent_lim(self, init, tickets, limitexp, limitdepth)
 
-        elif tickets == []:
-            final = search_3agent_nolim(self, init, limitexp, limitdepth)
+        elif tickets == [math.inf,math.inf,math.inf]:
+            return search_3agent_nolim(self, init, limitexp, limitdepth)
 
         elif anyorder:
-            final = []
+            return []
 
         else:
-            final = []
-
-        return final
+            return []
 
 
 #
 # Exercise 1 - One agent, no tickets limmit
 #
-def search_1agent_nolim(self, init, limitexp, limitdepth):
-    #print("Map: {}".format(self._model))
-
-    myMap = self._model
-    goal = self._goal[0]
-
+def bfs(myMap, init, goal, limitexp, limitdepth):
     visited = [ False ] * len(myMap)
-
     transport = [[]]
 
     done = False
-    queue = [[init[0]]]
+    queue = [[init]]
 
     while queue and not done:
         currTrans = transport.pop(0)
@@ -73,11 +65,17 @@ def search_1agent_nolim(self, init, limitexp, limitdepth):
 
             visited[currVertex] = True
 
-    final = [[[], init]] + [ [[T], [P]] for T, P in zip(currTrans, currPath[1:]) ]
+    final = [[[], [init]]] + [ [[T], [P]] for T, P in zip(currTrans, currPath[1:]) ]
 
     #print("final1: {}".format(final))
 
     return final
+
+
+def search_1agent_nolim(self, init, limitexp, limitdepth):
+    #print("Map: {}".format(self._model))
+
+    return bfs(self._model, init[0], self._goal[0], limitexp, limitdepth) 
 
 
 #
@@ -154,48 +152,10 @@ def search_3agent_nolim(self, init, limitexp, limitdepth):
 
     #print('goal is ' + str(goal))
 
+    finals = [ bfs(myMap, init[i], goals[i], limitexp, limitdepth) for i in range(3) ]
 
-    while done != [True, True, True]:
-        intents = []
+    print(finals)
 
-        for agent in range(3):
-            if done[agent]: continue
-            currPath = queues[agent].pop(0)
-            currTrans = transport[agent].pop(0)
-            currVertex = currPath[-1]
-
-            if currVertex not in visited[agent]:
-                #print(currVertex)
-                for i in myMap[currVertex]:
-
-
-                    if i[1] == goals[agent]:
-                        done[agent] = True
-                        visited[agent].add(i[1])
-
-                        newPath = list(currPath)
-                        newPath.append(i[1])
-
-                        newTrans = list(currTrans)
-                        newTrans.append(i[0])
-
-                        finals[agent] = newPath
-
-                        #print('done agent ' + str(agent) + ' with path ' + str(newPath))
-                        #print('done w path ' + str(newPath))
-                        #print('transport: ' + str(newTrans))
-                        break
-
-                    newPath = list(currPath)
-                    newPath.append(i[1])
-                    #print(newPath)
-                    queues[agent].append(newPath)
-
-                    newTrans = list(currTrans)
-                    newTrans.append(i[0])
-                    transport[agent].append(newTrans)
-
-                    visited[agent].add(currVertex)
 
 
     #print("final3: {}".format(final))
