@@ -31,10 +31,13 @@ class SearchProblem:
 
         return final
 
-def has_ticket(tickets, type):
-    return tickets[type] > 0
 
+#
+# Exercise 1 - One agent, no tickets limmit
+#
 def search_1agent_nolim(init, self):
+    #print("Map: {}".format(self._model))
+
     myMap = self._model
     goal = self._goal[0]
 
@@ -44,6 +47,7 @@ def search_1agent_nolim(init, self):
 
     done = False
     queue = [[init[0]]]
+
     while queue and not done:
         currTrans = transport.pop(0)
         currPath = queue.pop(0)
@@ -55,6 +59,12 @@ def search_1agent_nolim(init, self):
 
         if not visited[currVertex]:
             for option in myMap[currVertex]:
+
+                if option[1] == goal:
+                    currPath.append(option[1])
+                    currTrans.append(option[0])
+                    done = True
+                    break
 
                 if visited[option[1]]: continue
 
@@ -70,91 +80,81 @@ def search_1agent_nolim(init, self):
 
     final = [[[], init]] + [ [[T], [P]] for T, P in zip(currTrans, currPath[1:]) ]
 
-    #print("final: {}".format(final))
+    #print("final1: {}".format(final))
 
     return final
 
 
+#
+# Exercise 2 - One agent, tickets limmited
+#
+def has_ticket(tickets, type):
+    return tickets[type] > 0
+
 def search_1agent_lim(init, tickets, self):
     myMap = self._model
     goal = self._goal[0]
-    mapSize = len(myMap)
-    myTickets = [tickets.copy()]
 
-    #print(str(myMap))
+    myTickets = [tickets]
 
-    visited = set()
-    queue = []
+    visited = [set()]
     transport = [[]]
+
     done = False
-
-    #print('goal is ' + str(goal))
-    #print('available tickets: ' + str(tickets))
-
     queue = [[init[0]]]
 
     while queue and not done:
         currPath = queue.pop(0)
         currTrans = transport.pop(0)
+        currVisited = visited.pop(0)
         currTickets = myTickets.pop(0)
         currVertex = currPath[-1]
-        #print('visiting ' + str(currVertex))
 
-        if currVertex not in visited:
-            for i in myMap[currVertex]: #para cada par transporte/destino do vertice atual
-                if has_ticket(currTickets, i[0]):#se temos bilhetes desse transporte
-                    if i[1] == goal:#se o destino e o goal
-                        done = True
-                        visited.add(i[1])
+        if currVertex == goal:
+            done = True
+            continue
 
-                        newPath = list(currPath)
-                        newPath.append(i[1])
-                        queue.append(newPath)
+        # Also isn't worth if i've been to this position with >= tickets (otimization maiby)
+        for option in myMap[currVertex]:
+            if has_ticket(currTickets, option[0]) and option[1] not in currVisited:
 
-                        newTrans = list(currTrans)
-                        newTrans.append(i[0])
-                        transport.append(newTrans)
+                if option[1] == goal:
+                    currPath.append(option[1])
+                    currTrans.append(option[0])
+                    done = True
+                    break
 
-                        newTickets = currTickets.copy()
-                        newTickets[i[0]] -=1
+                newPath = currPath.copy()
+                newPath.append(option[1])
+                queue.append(newPath)
 
-                        #print('done w path ' + str(newPath))
-                        #print('transport: ' + str(newTrans))
-                        break
+                newTrans = currTrans.copy()
+                newTrans.append(option[0])
+                transport.append(newTrans)
 
-                    newPath = list(currPath)
-                    newPath.append(i[1])
-                    queue.append(newPath)
+                newTickets = currTickets.copy()
+                newTickets[option[0]] += -1
+                myTickets.append(newTickets)
 
-                    newTrans = list(currTrans)
-                    newTrans.append(i[0])
-                    transport.append(newTrans)
+                newVisited = currVisited.copy()
+                newVisited.add(currVertex)
+                visited.append(newVisited)
 
-                    newTickets = currTickets.copy()
-                    newTickets[i[0]] -=1
-                    myTickets.append(newTickets)
-
-            visited.add(currVertex)
     
-    path = newPath[1:]
-    pathLen = len(path)
+    final = [[[], init]] + [ [[T], [P]] for T, P in zip(currTrans, currPath[1:]) ]
 
-    final = [[[], init]]
-
-    i = 0
-
-    while ( i < pathLen ):
-        final.append([[newTrans[i]], [path[i]]])
-        i += 1
-
-    #print(str(final))
+    #print("final2: {}".format(final))
 
     return final
 
+
+#
+# Exercise 3 - Three agents, no tickets limmit
+#
 def search_3agent_nolim(init, self):
     myMap = self._model
     goals = self._goal
-    mapSize = len(myMap)
+
     visited = [ set() for i in range(3) ]
     queues = [ [[init[i]]] for i in range(3) ]
     transport = [ [[]] for i in range(3) ]
@@ -207,8 +207,7 @@ def search_3agent_nolim(init, self):
 
                     visited[agent].add(currVertex)
 
-        
 
-    print(finals)
+    #print("final3: {}".format(final))
 
     return ['final']
