@@ -68,13 +68,8 @@ def search_1agent_nolim(init, self):
 
                 if visited[option[1]]: continue
 
-                newPath = currPath.copy()
-                newPath.append(option[1])
-                queue.append(newPath)
-
-                newTrans = currTrans.copy()
-                newTrans.append(option[0])
-                transport.append(newTrans)
+                queue.append( currPath + [option[1]] )
+                transport.append( currTrans + [option[0]] )
 
             visited[currVertex] = True
 
@@ -124,13 +119,8 @@ def search_1agent_lim(init, tickets, self):
                     done = True
                     break
 
-                newPath = currPath.copy()
-                newPath.append(option[1])
-                queue.append(newPath)
-
-                newTrans = currTrans.copy()
-                newTrans.append(option[0])
-                transport.append(newTrans)
+                queue.append( currPath + [option[1]] )
+                transport.append( currTrans + [option[0]] )
 
                 newTickets = currTickets.copy()
                 newTickets[option[0]] += -1
