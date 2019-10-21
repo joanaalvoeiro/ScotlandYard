@@ -27,7 +27,7 @@ class SearchProblem:
         return final
 
 def has_ticket(tickets, type):
-  return tickets[type] > 0
+    return tickets[type] > 0
 
 def search_1agent_nolim(init, self):
     myMap = self._model
@@ -42,33 +42,33 @@ def search_1agent_nolim(init, self):
     queue = [[init[0]]]
 
     while queue and not done:
-      currPath = queue.pop(0)
-      currTrans = transport.pop(0)
-      currVertex = currPath[-1]
-      #print('visiting ' + str(currVertex))
+        currPath = queue.pop(0)
+        currTrans = transport.pop(0)
+        currVertex = currPath[-1]
+        #print('visiting ' + str(currVertex))
 
-      if currVertex not in visited:
-        for i in myMap[currVertex]:
-          if i[1] == goal:
-            done = True
-            visited.add(i[1])
+        if currVertex not in visited:
+            for i in myMap[currVertex]:
+                if i[1] == goal:
+                    done = True
+                    visited.add(i[1])
 
-            newPath = list(currPath)
-            newPath.append(i[1])
+                    newPath = list(currPath)
+                    newPath.append(i[1])
 
-            newTrans = list(currTrans)
-            newTrans.append(i[0])
-            #print('done w path ' + str(newPath))
-            #print('transport: ' + str(newTrans))
-            break
+                    newTrans = list(currTrans)
+                    newTrans.append(i[0])
+                    #print('done w path ' + str(newPath))
+                    #print('transport: ' + str(newTrans))
+                    break
 
-          newPath = list(currPath)
-          newPath.append(i[1])
-          queue.append(newPath)
+                newPath = list(currPath)
+                newPath.append(i[1])
+                queue.append(newPath)
 
-          newTrans = list(currTrans)
-          newTrans.append(i[0])
-          transport.append(newTrans)
+                newTrans = list(currTrans)
+                newTrans.append(i[0])
+                transport.append(newTrans)
 
         visited.add(currVertex)
     
@@ -79,9 +79,9 @@ def search_1agent_nolim(init, self):
 
     i = 0
 
-    while(i<pathLen):
-      final.append([[newTrans[i]], [path[i]]])
-      i += 1
+    while ( i < pathLen):
+        final.append([[newTrans[i]], [path[i]]])
+        i += 1
 
     #print(str(final))
 
@@ -107,48 +107,47 @@ def search_1agent_lim(init, tickets, self):
     queue = [[init[0]]]
 
     while queue and not done:
-      currPath = queue.pop(0)
-      currTrans = transport.pop(0)
-      currTickets = myTickets.pop(0)
-      currVertex = currPath[-1]
-      #print('visiting ' + str(currVertex))
+        currPath = queue.pop(0)
+        currTrans = transport.pop(0)
+        currTickets = myTickets.pop(0)
+        currVertex = currPath[-1]
+        #print('visiting ' + str(currVertex))
 
-      if currVertex not in visited:
-        for i in myMap[currVertex]: #para cada par transporte/destino do vertice atual
-          if has_ticket(currTickets, i[0]):#se temos bilhetes desse transporte
-            if i[1] == goal:#se o destino e o goal
-              done = True
-              visited.add(i[1])
+        if currVertex not in visited:
+            for i in myMap[currVertex]: #para cada par transporte/destino do vertice atual
+                if has_ticket(currTickets, i[0]):#se temos bilhetes desse transporte
+                    if i[1] == goal:#se o destino e o goal
+                        done = True
+                        visited.add(i[1])
 
-              newPath = list(currPath)
-              newPath.append(i[1])
-              queue.append(newPath)
+                        newPath = list(currPath)
+                        newPath.append(i[1])
+                        queue.append(newPath)
 
-              newTrans = list(currTrans)
-              newTrans.append(i[0])
-              transport.append(newTrans)
+                        newTrans = list(currTrans)
+                        newTrans.append(i[0])
+                        transport.append(newTrans)
 
-              newTickets = currTickets.copy()
-              newTickets[i[0]] -=1
+                        newTickets = currTickets.copy()
+                        newTickets[i[0]] -=1
 
-              #print('done w path ' + str(newPath))
-              #print('transport: ' + str(newTrans))
-              break
+                        #print('done w path ' + str(newPath))
+                        #print('transport: ' + str(newTrans))
+                        break
 
-            newPath = list(currPath)
-            newPath.append(i[1])
-            queue.append(newPath)
+                    newPath = list(currPath)
+                    newPath.append(i[1])
+                    queue.append(newPath)
 
-            newTrans = list(currTrans)
-            newTrans.append(i[0])
-            transport.append(newTrans)
+                    newTrans = list(currTrans)
+                    newTrans.append(i[0])
+                    transport.append(newTrans)
 
-            newTickets = currTickets.copy()
-            newTickets[i[0]] -=1
-            myTickets.append(newTickets)
+                    newTickets = currTickets.copy()
+                    newTickets[i[0]] -=1
+                    myTickets.append(newTickets)
 
-
-        visited.add(currVertex)
+            visited.add(currVertex)
     
     path = newPath[1:]
     pathLen = len(path)
@@ -158,8 +157,8 @@ def search_1agent_lim(init, tickets, self):
     i = 0
 
     while ( i < pathLen ):
-      final.append([[newTrans[i]], [path[i]]])
-      i += 1
+        final.append([[newTrans[i]], [path[i]]])
+        i += 1
 
     #print(str(final))
 
