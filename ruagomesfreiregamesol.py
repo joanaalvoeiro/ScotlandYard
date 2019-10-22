@@ -192,7 +192,8 @@ def triple_bfs(myMap, init, goal, limitexp, limitdepth):
 
         #print('possibilities: {}\ncombinations: {}\nvalid_combinations: {}'.format(possibilities, combinations, valid_combinations))
 
-        exp += 1
+        if combinations != []:
+            exp += 1
 
         for option in combinations:
             nextPos = [ option[i][1] for i in range(3) ]
@@ -266,7 +267,8 @@ def triple_bfs_lim(myMap, init, goal, tickets, limitexp, limitdepth):
 
         #print('possibilities: {}\ncombinations: {}\nvalid_combinations: {}'.format(possibilities, combinations, valid_combinations))
 
-        exp += 1
+        if combinations != []:
+            exp += 1
 
         for option in combinations:
             nextPos = [ option[i][1] for i in range(3) ]
@@ -353,7 +355,8 @@ def triple_bfs_lim_anyorder(myMap, init, goal, tickets, limitexp, limitdepth):
 
         #print('possibilities: {}\ncombinations: {}\nvalid_combinations: {}'.format(possibilities, combinations, valid_combinations))
 
-        exp += 1
+        if combinations != []:
+            exp += 1
 
         for option in combinations:
             nextPos = [ option[i][1] for i in range(3) ]
