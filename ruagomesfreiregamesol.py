@@ -1,4 +1,4 @@
-# 86752 Afonso Ribeiro - Joana Alvoeiro
+# 86752 Afonso Ribeiro - 89469 Joana Alvoeiro
 
 import math
 import pickle
@@ -22,11 +22,10 @@ class SearchProblem:
         elif tickets == [math.inf,math.inf,math.inf]:
             return search_3agent_nolim(self, init, limitexp, limitdepth)
 
-        elif anyorder:
-            return []
-
+        elif not anyorder:
+            return search_3agent_lim(self, init, tickets, limitexp, limitdepth)
         else:
-            return []
+            return search_3agent_lim_anyorder(self, init, tickets, limitexp, limitdepth)
 
 
 #
@@ -144,6 +143,9 @@ def triple_bfs(myMap, init, goal, limitexp, limitdepth):
     done = False
     queue = [[init]]
 
+    depth = -1
+    configurations = set()
+
     while queue and not done:
         currTrans3 = transport.pop(0)
         currPath3 = queue.pop(0)
@@ -153,17 +155,20 @@ def triple_bfs(myMap, init, goal, limitexp, limitdepth):
             done = True
             continue
 
-
         possibilities = [ myMap[currVertex] for currVertex in currVertexes3 ]
-        combinations = [ [option1, option2, option3] for option1 in possibilities[0] for option2 in possibilities[1] for option3 in possibilities[2] ]
+        combinations = [ [option1, option2, option3] for option1 in possibilities[0] \
+                        for option2 in possibilities[1] for option3 in possibilities[2] \
+                        if option1[1] != option2[1] != option3[1] != option1[1] \
+                        and (option1[1], option2[1], option3[1]) not in configurations ]
 
-        valid_combinations = list( filter( lambda option: option[0][1] != option[1][1] != option[2][1] != option[0][1], combinations ) )
+        #print("combinations: {}".format(len(combinations)))
 
         #print('possibilities: {}\ncombinations: {}\nvalid_combinations: {}'.format(possibilities, combinations, valid_combinations))
 
-        for option in valid_combinations:
+        for option in combinations:
             nextPos = [ option[i][1] for i in range(3) ]
             nextTrans = [ option[i][0] for i in range(3) ]
+            configurations.add( ( option[0][1], option[1][1], option[2][1]) )
 
             if nextPos == goal:
                 currPath3.append(nextPos)
@@ -188,6 +193,163 @@ def search_3agent_nolim(self, init, limitexp, limitdepth):
 
     final = triple_bfs(myMap, init, goals, limitexp, limitdepth)
 
-    print("final3: {}".format(final))
+    #print("final3: {}".format(final))
+
+    return final
+
+
+#
+# Exercise 4 - Three agents, tickets limited
+#
+def triple_bfs_lim(myMap, init, goal, tickets, limitexp, limitdepth):
+    transport = [[[]]]
+    tickets = [tickets]
+
+    done = False
+    queue = [[init]]
+
+    depth = -1
+    configurations = set()
+
+    while queue and not done:
+        currTickets = tickets.pop(0)
+        currTrans3 = transport.pop(0)
+        currPath3 = queue.pop(0)
+        currVertexes3 = currPath3[-1]
+
+        if currVertexes3 == goal:
+            done = True
+            continue
+
+        possibilities = [ myMap[currVertex] for currVertex in currVertexes3 ]
+        combinations = [ [option1, option2, option3] for option1 in possibilities[0] \
+                        for option2 in possibilities[1] for option3 in possibilities[2] \
+                        if option1[1] != option2[1] != option3[1] != option1[1] \
+                        and (option1[1], option2[1], option3[1]) not in configurations ]
+
+        #print("combinations: {}".format(len(combinations)))
+
+        #print('possibilities: {}\ncombinations: {}\nvalid_combinations: {}'.format(possibilities, combinations, valid_combinations))
+
+        for option in combinations:
+            nextPos = [ option[i][1] for i in range(3) ]
+            nextTrans = [ option[i][0] for i in range(3) ]
+            newTickets = currTickets.copy()
+
+            invalid_ticket_n = False
+            for trans_index in nextTrans:
+                newTickets[trans_index] += -1
+                if newTickets[trans_index] < 0:
+                    invalid_ticket_n = True
+
+            if invalid_ticket_n:
+                continue
+
+            configurations.add( ( option[0][1], option[1][1], option[2][1]) )
+
+            if nextPos == goal:
+                currPath3.append(nextPos)
+                currTrans3.append(nextTrans)
+                done = True
+                break
+
+            queue.append( currPath3 + [nextPos] )
+            transport.append( currTrans3 + [nextTrans] )
+            tickets.append( newTickets )
+
+
+    final = [ [T, P] for T, P in zip(currTrans3, currPath3) ]
+
+    return final
+
+
+def search_3agent_lim(self, init, tickets, limitexp, limitdepth):
+    myMap = self._model
+    goals = self._goal
+
+    #print('goal is ' + str(goal))
+
+    final = triple_bfs_lim(myMap, init, goals, tickets, limitexp, limitdepth)
+
+    #print("final4: {}".format(final))
+
+    return final
+
+#
+# Exercise 5 - Three agents, tickets limited
+#
+def triple_bfs_lim_anyorder(myMap, init, goal, tickets, limitexp, limitdepth):
+    transport = [[[]]]
+    tickets = [tickets]
+
+    goals = [ [a, b, c] for a in goal for b in goal for c in goal if a != b != c != a ]
+
+    done = False
+    queue = [[init]]
+
+    depth = -1
+    configurations = set()
+
+    while queue and not done:
+        currTickets = tickets.pop(0)
+        currTrans3 = transport.pop(0)
+        currPath3 = queue.pop(0)
+        currVertexes3 = currPath3[-1]
+
+        if currVertexes3 in goals:
+            done = True
+            continue
+
+        possibilities = [ myMap[currVertex] for currVertex in currVertexes3 ]
+        combinations = [ [option1, option2, option3] for option1 in possibilities[0] \
+                        for option2 in possibilities[1] for option3 in possibilities[2] \
+                        if option1[1] != option2[1] != option3[1] != option1[1] \
+                        and (option1[1], option2[1], option3[1]) not in configurations ]
+
+        #print("combinations: {}".format(len(combinations)))
+
+        #print('possibilities: {}\ncombinations: {}\nvalid_combinations: {}'.format(possibilities, combinations, valid_combinations))
+
+        for option in combinations:
+            nextPos = [ option[i][1] for i in range(3) ]
+            nextTrans = [ option[i][0] for i in range(3) ]
+            newTickets = currTickets.copy()
+
+            invalid_ticket_n = False
+            for trans_index in nextTrans:
+                newTickets[trans_index] += -1
+                if newTickets[trans_index] < 0:
+                    invalid_ticket_n = True
+
+            if invalid_ticket_n:
+                continue
+
+            configurations.add( ( option[0][1], option[1][1], option[2][1]) )
+
+            if nextPos in goals:
+                currPath3.append(nextPos)
+                currTrans3.append(nextTrans)
+                done = True
+                break
+
+            queue.append( currPath3 + [nextPos] )
+            transport.append( currTrans3 + [nextTrans] )
+            tickets.append( newTickets )
+
+
+    final = [ [T, P] for T, P in zip(currTrans3, currPath3) ]
+
+    return final
+
+
+def search_3agent_lim_anyorder(self, init, tickets, limitexp, limitdepth):
+    myMap = self._model
+    goals = self._goal
+
+    #print('goal is ' + str(goal))
+
+    final = triple_bfs_lim_anyorder(myMap, init, goals, tickets, limitexp, limitdepth)
+
+    #print("final5: {}".format(final))
 
     return final
