@@ -111,7 +111,7 @@ print("%.1fms"%((tend-tinit)*1000))
 if validatepath(nn,I,U):
         print("path")
         print(nn)
-        plotpath(nn,coords)
+        #plotpath(nn,coords)
 else:
         print("invalid path")
 
@@ -126,10 +126,10 @@ print("%.1fms"%((tend-tinit)*1000))
 if validatepath(nn,I,U):
         print("path")
         print(nn)
-        plotpath(nn,coords)
+        #plotpath(nn,coords)
 else:
         print("invalid path")
-        
+       
 print("\n(4 val) Exercise 4 - Three agents, Limits")
 print("Init [30,40,109] Goal [61,60,71]")
 SP = SearchProblem(goal = [63,61,70], model = U, auxheur=coords)
@@ -141,7 +141,7 @@ print("%.1fms"%((tend-tinit)*1000))
 if validatepath(nn,I,U, tickets = [5,20,2]):
         print("path")
         print(nn)
-        plotpath(nn,coords)
+        #plotpath(nn,coords)
 else:
         print("invalid path")
 
@@ -156,7 +156,7 @@ print("%.1fms"%((tend-tinit)*1000))
 if validatepath(nn,I,U, tickets = [5,20,2]):
         print("path")
         print(nn)
-        plotpath(nn,coords)
+        #plotpath(nn,coords)
 else:
         print("invalid path")
         
