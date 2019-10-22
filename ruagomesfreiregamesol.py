@@ -31,7 +31,7 @@ class SearchProblem:
 
 
 #
-# Exercise 1 - One agent, no tickets limmit
+# Exercise 1 - One agent, no tickets limit
 #
 def bfs(myMap, init, goal, limitexp, limitdepth):
     visited = [ False ] * len(myMap)
@@ -79,7 +79,7 @@ def search_1agent_nolim(self, init, limitexp, limitdepth):
 
 
 #
-# Exercise 2 - One agent, tickets limmited
+# Exercise 2 - One agent, tickets limitted
 #
 def has_ticket(tickets, type):
     return tickets[type] > 0
@@ -107,7 +107,7 @@ def search_1agent_lim(self, init, tickets, limitexp, limitdepth):
             done = True
             continue
 
-        # Also isn't worth if i've been to this position with >= tickets (otimization maiby)
+        # Also isn't worth if i've been to this position with >= tickets (optimization maybe)
         for option in myMap[currVertex]:
             if has_ticket(currTickets, option[0]) and option[1] not in currVisited:
 
@@ -137,7 +137,7 @@ def search_1agent_lim(self, init, tickets, limitexp, limitdepth):
 
 
 #
-# Exercise 3 - Three agents, no tickets limmit
+# Exercise 3 - Three agents, no tickets limit
 #
 def search_3agent_nolim(self, init, limitexp, limitdepth):
     myMap = self._model
