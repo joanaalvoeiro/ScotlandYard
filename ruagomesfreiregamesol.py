@@ -13,166 +13,136 @@ class SearchProblem:
         self._auxheur = auxheur
         pass
 
-    def search(self, init, limitexp = 2000, limitdepth = 10, tickets = [], anyorder = False):
-        if len(self._goal) == 1 and tickets == []:
-            final = search_1agent_nolim(init, self)
+    def search(self, init, limitexp = 2000, limitdepth = 10, tickets = [math.inf,math.inf,math.inf], anyorder = False):
+        if len(self._goal) == 1 and tickets ==  [math.inf,math.inf,math.inf]:
+            return search_1agent_nolim(self, init, limitexp, limitdepth)
 
         elif len(self._goal) == 1:
-            final = search_1agent_lim(init, tickets, self)
+            return search_1agent_lim(self, init, tickets, limitexp, limitdepth)
 
-        elif tickets == []:
-            final = search_3agent_nolim(init, self)
+        elif tickets == [math.inf,math.inf,math.inf]:
+            return search_3agent_nolim(self, init, limitexp, limitdepth)
 
         elif anyorder:
-            final = []
+            return []
 
         else:
-            final = []
+            return []
 
-        return final
 
+#
+# Exercise 1 - One agent, no tickets limmit
+#
+def bfs(myMap, init, goal, limitexp, limitdepth):
+    visited = [ False ] * len(myMap)
+    transport = [[]]
+
+    done = False
+    queue = [[init]]
+
+    while queue and not done:
+        currTrans = transport.pop(0)
+        currPath = queue.pop(0)
+        currVertex = currPath[-1]
+
+        if currVertex == goal:
+            done = True
+            continue
+
+        if not visited[currVertex]:
+            for option in myMap[currVertex]:
+
+                if option[1] == goal:
+                    currPath.append(option[1])
+                    currTrans.append(option[0])
+                    done = True
+                    break
+
+                if visited[option[1]]: continue
+
+                queue.append( currPath + [option[1]] )
+                transport.append( currTrans + [option[0]] )
+
+            visited[currVertex] = True
+
+    final = [[[], [init]]] + [ [[T], [P]] for T, P in zip(currTrans, currPath[1:]) ]
+
+    #print("final1: {}".format(final))
+
+    return final
+
+
+def search_1agent_nolim(self, init, limitexp, limitdepth):
+    #print("Map: {}".format(self._model))
+
+    return bfs(self._model, init[0], self._goal[0], limitexp, limitdepth) 
+
+
+#
+# Exercise 2 - One agent, tickets limmited
+#
 def has_ticket(tickets, type):
     return tickets[type] > 0
 
-def search_1agent_nolim(init, self):
+def search_1agent_lim(self, init, tickets, limitexp, limitdepth):
     myMap = self._model
     goal = self._goal[0]
-    mapSize = len(myMap)
-    visited = set()
+
+    myTickets = [tickets]
+
+    visited = [set()]
     transport = [[]]
+
     done = False
-
-    #print('goal is ' + str(goal))
-
     queue = [[init[0]]]
 
     while queue and not done:
         currPath = queue.pop(0)
         currTrans = transport.pop(0)
-        currVertex = currPath[-1]
-        #print('visiting ' + str(currVertex))
-
-        if currVertex not in visited:
-            for i in myMap[currVertex]:
-                if i[1] == goal:
-                    done = True
-                    visited.add(i[1])
-
-                    newPath = list(currPath)
-                    newPath.append(i[1])
-
-                    newTrans = list(currTrans)
-                    newTrans.append(i[0])
-                    #print('done w path ' + str(newPath))
-                    #print('transport: ' + str(newTrans))
-                    break
-
-                newPath = list(currPath)
-                newPath.append(i[1])
-                queue.append(newPath)
-
-                newTrans = list(currTrans)
-                newTrans.append(i[0])
-                transport.append(newTrans)
-
-        visited.add(currVertex)
-    
-    path = newPath[1:]
-    pathLen = len(path)
-
-    final = [[[], init]]
-
-    i = 0
-
-    while ( i < pathLen):
-        final.append([[newTrans[i]], [path[i]]])
-        i += 1
-
-    #print(str(final))
-
-    return final
-
-
-def search_1agent_lim(init, tickets, self):
-    myMap = self._model
-    goal = self._goal[0]
-    mapSize = len(myMap)
-    myTickets = [tickets.copy()]
-
-    #print(str(myMap))
-
-    visited = set()
-    queue = []
-    transport = [[]]
-    done = False
-
-    #print('goal is ' + str(goal))
-    #print('available tickets: ' + str(tickets))
-
-    queue = [[init[0]]]
-
-    while queue and not done:
-        currPath = queue.pop(0)
-        currTrans = transport.pop(0)
+        currVisited = visited.pop(0)
         currTickets = myTickets.pop(0)
         currVertex = currPath[-1]
-        #print('visiting ' + str(currVertex))
 
-        if currVertex not in visited:
-            for i in myMap[currVertex]: #para cada par transporte/destino do vertice atual
-                if has_ticket(currTickets, i[0]):#se temos bilhetes desse transporte
-                    if i[1] == goal:#se o destino e o goal
-                        done = True
-                        visited.add(i[1])
+        if currVertex == goal:
+            done = True
+            continue
 
-                        newPath = list(currPath)
-                        newPath.append(i[1])
-                        queue.append(newPath)
+        # Also isn't worth if i've been to this position with >= tickets (otimization maiby)
+        for option in myMap[currVertex]:
+            if has_ticket(currTickets, option[0]) and option[1] not in currVisited:
 
-                        newTrans = list(currTrans)
-                        newTrans.append(i[0])
-                        transport.append(newTrans)
+                if option[1] == goal:
+                    currPath.append(option[1])
+                    currTrans.append(option[0])
+                    done = True
+                    break
 
-                        newTickets = currTickets.copy()
-                        newTickets[i[0]] -=1
+                queue.append( currPath + [option[1]] )
+                transport.append( currTrans + [option[0]] )
 
-                        #print('done w path ' + str(newPath))
-                        #print('transport: ' + str(newTrans))
-                        break
+                newTickets = currTickets.copy()
+                newTickets[option[0]] += -1
+                myTickets.append(newTickets)
 
-                    newPath = list(currPath)
-                    newPath.append(i[1])
-                    queue.append(newPath)
+                newVisited = currVisited.copy()
+                newVisited.add(currVertex)
+                visited.append(newVisited)
 
-                    newTrans = list(currTrans)
-                    newTrans.append(i[0])
-                    transport.append(newTrans)
-
-                    newTickets = currTickets.copy()
-                    newTickets[i[0]] -=1
-                    myTickets.append(newTickets)
-
-            visited.add(currVertex)
     
-    path = newPath[1:]
-    pathLen = len(path)
+    final = [[[], init]] + [ [[T], [P]] for T, P in zip(currTrans, currPath[1:]) ]
 
-    final = [[[], init]]
-
-    i = 0
-
-    while ( i < pathLen ):
-        final.append([[newTrans[i]], [path[i]]])
-        i += 1
-
-    #print(str(final))
+    #print("final2: {}".format(final))
 
     return final
 
-def search_3agent_nolim(init, self):
+
+#
+# Exercise 3 - Three agents, no tickets limmit
+#
+def search_3agent_nolim(self, init, limitexp, limitdepth):
     myMap = self._model
     goals = self._goal
-    mapSize = len(myMap)
+
     visited = [ set() for i in range(3) ]
     queues = [ [[init[i]]] for i in range(3) ]
     transport = [ [[]] for i in range(3) ]
@@ -182,51 +152,12 @@ def search_3agent_nolim(init, self):
 
     #print('goal is ' + str(goal))
 
-
-    while done != [True, True, True]:
-        intents = []
-
-        for agent in range(3):
-            if done[agent]: continue
-            currPath = queues[agent].pop(0)
-            currTrans = transport[agent].pop(0)
-            currVertex = currPath[-1]
-
-            if currVertex not in visited[agent]:
-                #print(currVertex)
-                for i in myMap[currVertex]:
-
-
-                    if i[1] == goals[agent]:
-                        done[agent] = True
-                        visited[agent].add(i[1])
-
-                        newPath = list(currPath)
-                        newPath.append(i[1])
-
-                        newTrans = list(currTrans)
-                        newTrans.append(i[0])
-
-                        finals[agent] = newPath
-
-                        #print('done agent ' + str(agent) + ' with path ' + str(newPath))
-                        #print('done w path ' + str(newPath))
-                        #print('transport: ' + str(newTrans))
-                        break
-
-                    newPath = list(currPath)
-                    newPath.append(i[1])
-                    #print(newPath)
-                    queues[agent].append(newPath)
-
-                    newTrans = list(currTrans)
-                    newTrans.append(i[0])
-                    transport[agent].append(newTrans)
-
-                    visited[agent].add(currVertex)
-
-        
+    finals = [ bfs(myMap, init[i], goals[i], limitexp, limitdepth) for i in range(3) ]
 
     print(finals)
+
+
+
+    #print("final3: {}".format(final))
 
     return ['final']
