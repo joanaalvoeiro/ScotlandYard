@@ -28,6 +28,13 @@ class SearchProblem:
             return search_3agent_lim_anyorder(self, init, tickets, limitexp, limitdepth)
 
 
+def limit_depth_reached():
+    print("LIMIT_DEPTH_REACHED")
+
+def limit_expanssion_reached():
+    print("LIMIT_EXPANSION_REACHED")
+
+
 #
 # Exercise 1 - One agent, no tickets limit
 #
@@ -38,16 +45,23 @@ def bfs(myMap, init, goal, limitexp, limitdepth):
     done = False
     queue = [[init]]
 
+    exp = 0
     while queue and not done:
         currTrans = transport.pop(0)
         currPath = queue.pop(0)
         currVertex = currPath[-1]
+
+        if len(currTrans) == limitdepth:
+            limit_depth_reached()
+        if exp == limitexp:
+            limit_expanssion_reached()
 
         if currVertex == goal:
             done = True
             continue
 
         if currVertex not in visited:
+            exp += 1
             for option in myMap[currVertex]:
 
                 if option[1] == goal:
@@ -94,12 +108,18 @@ def search_1agent_lim(self, init, tickets, limitexp, limitdepth):
     done = False
     queue = [[init[0]]]
 
+    exp = 0
     while queue and not done:
         currPath = queue.pop(0)
         currTrans = transport.pop(0)
         currVisited = visited.pop(0)
         currTickets = myTickets.pop(0)
         currVertex = currPath[-1]
+
+        if len(currTrans) == limitdepth:
+            limit_depth_reached()
+        if exp == limitexp:
+            limit_expanssion_reached()
 
         if currVertex == goal:
             done = True
@@ -108,6 +128,7 @@ def search_1agent_lim(self, init, tickets, limitexp, limitdepth):
         # Also isn't worth if i've been to this position with >= tickets (optimization maybe)
         for option in myMap[currVertex]:
             if has_ticket(currTickets, option[0]) and option[1] not in currVisited:
+                exp += 1
 
                 if option[1] == goal:
                     currPath.append(option[1])
@@ -146,10 +167,16 @@ def triple_bfs(myMap, init, goal, limitexp, limitdepth):
     depth = -1
     configurations = set()
 
+    exp = 0
     while queue and not done:
         currTrans3 = transport.pop(0)
         currPath3 = queue.pop(0)
         currVertexes3 = currPath3[-1]
+
+        if len(currTrans3)-1 == limitdepth:
+            limit_depth_reached()
+        if exp == limitexp:
+            limit_expanssion_reached()
 
         if currVertexes3 == goal:
             done = True
@@ -164,6 +191,8 @@ def triple_bfs(myMap, init, goal, limitexp, limitdepth):
         #print("combinations: {}".format(len(combinations)))
 
         #print('possibilities: {}\ncombinations: {}\nvalid_combinations: {}'.format(possibilities, combinations, valid_combinations))
+
+        exp += 1
 
         for option in combinations:
             nextPos = [ option[i][1] for i in range(3) ]
@@ -211,11 +240,17 @@ def triple_bfs_lim(myMap, init, goal, tickets, limitexp, limitdepth):
     depth = -1
     configurations = set()
 
+    exp = 0
     while queue and not done:
         currTickets = tickets.pop(0)
         currTrans3 = transport.pop(0)
         currPath3 = queue.pop(0)
         currVertexes3 = currPath3[-1]
+
+        if len(currTrans3)-1 == limitdepth:
+            limit_depth_reached()
+        if exp == limitexp:
+            limit_expanssion_reached()
 
         if currVertexes3 == goal:
             done = True
@@ -230,6 +265,8 @@ def triple_bfs_lim(myMap, init, goal, tickets, limitexp, limitdepth):
         #print("combinations: {}".format(len(combinations)))
 
         #print('possibilities: {}\ncombinations: {}\nvalid_combinations: {}'.format(possibilities, combinations, valid_combinations))
+
+        exp += 1
 
         for option in combinations:
             nextPos = [ option[i][1] for i in range(3) ]
@@ -290,11 +327,17 @@ def triple_bfs_lim_anyorder(myMap, init, goal, tickets, limitexp, limitdepth):
     depth = -1
     configurations = set()
 
+    exp = 0
     while queue and not done:
         currTickets = tickets.pop(0)
         currTrans3 = transport.pop(0)
         currPath3 = queue.pop(0)
         currVertexes3 = currPath3[-1]
+
+        if len(currTrans3)-1 == limitdepth:
+            limit_depth_reached()
+        if exp == limitexp:
+            limit_expanssion_reached()
 
         if currVertexes3 in goals:
             done = True
@@ -309,6 +352,8 @@ def triple_bfs_lim_anyorder(myMap, init, goal, tickets, limitexp, limitdepth):
         #print("combinations: {}".format(len(combinations)))
 
         #print('possibilities: {}\ncombinations: {}\nvalid_combinations: {}'.format(possibilities, combinations, valid_combinations))
+
+        exp += 1
 
         for option in combinations:
             nextPos = [ option[i][1] for i in range(3) ]
