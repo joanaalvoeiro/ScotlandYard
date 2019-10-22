@@ -11,7 +11,6 @@ class SearchProblem:
         self._goal = goal
         self._model = model
         self._auxheur = auxheur
-        pass
 
     def search(self, init, limitexp = 2000, limitdepth = 10, tickets = [math.inf,math.inf,math.inf], anyorder = False):
         if len(self._goal) == 1 and tickets ==  [math.inf,math.inf,math.inf]:
@@ -34,7 +33,7 @@ class SearchProblem:
 # Exercise 1 - One agent, no tickets limit
 #
 def bfs(myMap, init, goal, limitexp, limitdepth):
-    visited = [ False ] * len(myMap)
+    visited = set()
     transport = [[]]
 
     done = False
@@ -49,7 +48,7 @@ def bfs(myMap, init, goal, limitexp, limitdepth):
             done = True
             continue
 
-        if not visited[currVertex]:
+        if currVertex not in visited:
             for option in myMap[currVertex]:
 
                 if option[1] == goal:
@@ -58,12 +57,12 @@ def bfs(myMap, init, goal, limitexp, limitdepth):
                     done = True
                     break
 
-                if visited[option[1]]: continue
+                if option[1] in visited: continue
 
                 queue.append( currPath + [option[1]] )
                 transport.append( currTrans + [option[0]] )
 
-            visited[currVertex] = True
+            visited.add(currVertex)
 
     final = [[[], [init]]] + [ [[T], [P]] for T, P in zip(currTrans, currPath[1:]) ]
 
@@ -139,25 +138,56 @@ def search_1agent_lim(self, init, tickets, limitexp, limitdepth):
 #
 # Exercise 3 - Three agents, no tickets limit
 #
+def triple_bfs(myMap, init, goal, limitexp, limitdepth):
+    transport = [[[]]]
+
+    done = False
+    queue = [[init]]
+
+    while queue and not done:
+        currTrans3 = transport.pop(0)
+        currPath3 = queue.pop(0)
+        currVertexes3 = currPath3[-1]
+
+        if currVertexes3 == goal:
+            done = True
+            continue
+
+
+        possibilities = [ myMap[currVertex] for currVertex in currVertexes3 ]
+        combinations = [ [option1, option2, option3] for option1 in possibilities[0] for option2 in possibilities[1] for option3 in possibilities[2] ]
+
+        valid_combinations = list( filter( lambda option: option[0][1] != option[1][1] != option[2][1] != option[0][1], combinations ) )
+
+        #print('possibilities: {}\ncombinations: {}\nvalid_combinations: {}'.format(possibilities, combinations, valid_combinations))
+
+        for option in valid_combinations:
+            nextPos = [ option[i][1] for i in range(3) ]
+            nextTrans = [ option[i][0] for i in range(3) ]
+
+            if nextPos == goal:
+                currPath3.append(nextPos)
+                currTrans3.append(nextTrans)
+                done = True
+                break
+
+            queue.append( currPath3 + [nextPos] )
+            transport.append( currTrans3 + [nextTrans] )
+
+
+    final = [ [T, P] for T, P in zip(currTrans3, currPath3) ]
+
+    return final
+
+
 def search_3agent_nolim(self, init, limitexp, limitdepth):
     myMap = self._model
     goals = self._goal
 
-    visited = [ set() for i in range(3) ]
-    queues = [ [[init[i]]] for i in range(3) ]
-    transport = [ [[]] for i in range(3) ]
-    done = [ False for i in range(3) ]
-    finals = [ [] for i in range(3) ]
-    depth = [ 0 for i in range(3) ]
-
     #print('goal is ' + str(goal))
 
-    finals = [ bfs(myMap, init[i], goals[i], limitexp, limitdepth) for i in range(3) ]
+    final = triple_bfs(myMap, init, goals, limitexp, limitdepth)
 
-    print(finals)
+    print("final3: {}".format(final))
 
-
-
-    #print("final3: {}".format(final))
-
-    return ['final']
+    return final
