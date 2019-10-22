@@ -1,4 +1,4 @@
-# 86752 Afonso Ribeiro - Joana Alvoeiro
+# 86752 Afonso Ribeiro - 89469 Joana Alvoeiro
 
 import math
 import pickle
@@ -272,10 +272,12 @@ def path_of_size(myMap, init, goal, limitexp, limitdepth, size):
     done = False
     queue = [[init]]
 
+    print("init: {}\n goal: {}".format(init, goal))
+
     exp = 0
     depth = 1
     while queue and not done and exp <= limitexp and depth <= limitdepth:
-
+        print("queue: {}".format(queue))
         depth = len(queue[0])
         if depth == size:
             done = True
@@ -313,6 +315,13 @@ def is_solution(path0, path1, path2):
 
     return True
 
+def combine_and_check(paths0, paths1, paths2):
+    for i in range(len(paths0)):
+        for j in range(len(paths1)):
+            for k in range(len(paths2)):
+                if is_solution(paths0[i], paths1[j], paths2[k]):
+                    return i, j, k;
+    return -1, -1, -1
 
 def search_3agent_nolim(self, init, limitexp, limitdepth):
 
@@ -329,14 +338,34 @@ def search_3agent_nolim(self, init, limitexp, limitdepth):
     if is_solution(pair0[1], pair1[1], pair2[1]):
         return return_format(init)
 
-    worst = pair0
-    if len(worst[0]) < len(pair1[0]):
-        worst = pair1
+    worst = len(pair0[0])
+    if worst < len(pair1[0]):
+        worst = len(pair1[0])
+    if worst < len(pair2[0]):
+        worst = len(pair2[0])
 
-    if len(worst[0]) < len(pair2[0]):
-        worst = pair2
+    fully_done = False
+    while not fully_done:
+        done = False
+        while not done:
+            done = True
+            option = []
+            for i in range(3):
+                option.append(path_of_size(myMap, init[i], goals[i], limitexp, limitdepth, worst))
+                if option[-1] == ([],[]):
+                    done = False
+                    break
+            worst += 1
+
+        print(option)
+
+        i, j, k = combine_and_check(option[0][1], option[1][1], option[2][1])
+
+        if i >= 0:
+            fully_done = True
 
 
+    final = return_format(init, (option[0][i][1], option[0][i][0][1:]), (option[1][j][1], option[1][j][0][1:]), (option[2][k][1], option[2][k][0][1:]))
 
     print("final3: {}".format("df"))
 
