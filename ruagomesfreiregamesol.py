@@ -4,6 +4,38 @@ import math
 import pickle
 import time
 
+heuristic = []
+h_trans = []
+
+def floyd_warshall(model):
+
+    V = len(model)
+
+    no_transports_model = [ [option[1] for option in dest] for dest in model ]
+
+    global heuristic
+    heuristic = [ [1 if j in no_transports_model[i] and j != i else math.inf for j in range(V) ] for i in range(V) ]
+
+
+    global h_trans
+    h_trans = [ [[] for j in range(V) ] for i in range(V) ]
+
+    for k in range(V):
+        for i in range(V):
+            for j in range(V):
+                heuristic[i][j] = min(heuristic[i][j], heuristic[i][k] + heuristic[k][j])
+    
+    for i in range(V):
+        for option in model[i]:
+            h_trans[i][option[1]].append(option[0])
+
+    f = open("heuristic.txt", "w")
+    f.write(str(heuristic))
+    f.close()
+
+    f = open("h_trans.txt", "w")
+    f.write(str(h_trans))
+    f.close()
   
 class SearchProblem:
 
@@ -11,6 +43,9 @@ class SearchProblem:
         self._goal = goal
         self._model = model
         self._auxheur = auxheur
+        global heuristic
+        if heuristic == []:
+            floyd_warshall(model)
 
     def search(self, init, limitexp = 2000, limitdepth = 10, tickets = [math.inf,math.inf,math.inf], anyorder = False):
         if len(self._goal) == 1 and tickets ==  [math.inf,math.inf,math.inf]:
@@ -38,56 +73,33 @@ def limit_expanssion_reached():
 #
 # Exercise 1 - One agent, no tickets limit
 #
-def bfs(myMap, init, goal, limitexp, limitdepth):
-    visited = set()
-    transport = [[]]
+def A_star(init, goal, limitexp, limitdepth, final):
+    required_depth = heuristic[init][goal]
+    if required_depth == 1:
+        final.append([[ h_trans[init][goal][0] ], [goal]])
+        return
 
-    done = False
-    queue = [[init]]
+    print("init: {} || goal: {}".format(init, goal))
 
-    exp = 0
-    while queue and not done:
-        currTrans = transport.pop(0)
-        currPath = queue.pop(0)
-        currVertex = currPath[-1]
-
-        if len(currTrans) == limitdepth:
-            limit_depth_reached()
-        if exp == limitexp:
-            limit_expanssion_reached()
-
-        if currVertex == goal:
-            done = True
-            continue
-
-        if currVertex not in visited:
-            exp += 1
-            for option in myMap[currVertex]:
-
-                if option[1] == goal:
-                    currPath.append(option[1])
-                    currTrans.append(option[0])
-                    done = True
-                    break
-
-                if option[1] in visited: continue
-
-                queue.append( currPath + [option[1]] )
-                transport.append( currTrans + [option[0]] )
-
-            visited.add(currVertex)
-
-    final = [[[], [init]]] + [ [[T], [P]] for T, P in zip(currTrans, currPath[1:]) ]
-
-    #print("final1: {}".format(final))
-
-    return final
+    for new_step in range(len(heuristic)):
+        if heuristic[init][new_step] == 1 and heuristic[new_step][goal] == required_depth - 1:
+            final.append([[ h_trans[init][new_step][0] ], [new_step]])
+            A_star(new_step, goal, limitexp, limitdepth, final)
+            return
 
 
 def search_1agent_nolim(self, init, limitexp, limitdepth):
     #print("Map: {}".format(self._model))
 
-    return bfs(self._model, init[0], self._goal[0], limitexp, limitdepth) 
+    if heuristic[init[0]][self._goal[0]] > limitdepth:
+        return []
+
+    final = [ [[], init] ]
+    A_star(init[0], self._goal[0], limitexp, limitdepth, final)
+
+    print("final1: {}".format(final))
+
+    return final
 
 
 #
@@ -96,62 +108,44 @@ def search_1agent_nolim(self, init, limitexp, limitdepth):
 def has_ticket(tickets, type):
     return tickets[type] > 0
 
+def A_star_limitted(init, goal, tickets, limitexp, max_depth):
+    required_depth = max_depth
+    if required_depth == 1:
+        for transport in h_trans[init][goal]:
+            if has_ticket(tickets, transport):
+                return [ [[ h_trans[init][goal][0] ], [goal]] ]
+        return []
+
+    for new_step in range(len(heuristic)):
+        if heuristic[init][new_step] == 1 and heuristic[new_step][goal] <= required_depth - 1:
+            for transport in h_trans[init][new_step]:
+                if has_ticket(tickets, transport):
+                    new_tickets = tickets.copy()
+                    new_tickets[transport] += -1
+                    path = A_star_limitted(new_step, goal, new_tickets, limitexp, required_depth-1)
+
+                    if path != []:
+                        return [ [[ transport ], [new_step]] ] + path
+    return []
+
+
 def search_1agent_lim(self, init, tickets, limitexp, limitdepth):
-    myMap = self._model
+    initial = init [0]
     goal = self._goal[0]
-
-    myTickets = [tickets]
-
-    visited = [set()]
-    transport = [[]]
-
-    done = False
-    queue = [[init[0]]]
-
-    exp = 0
-    while queue and not done:
-        currPath = queue.pop(0)
-        currTrans = transport.pop(0)
-        currVisited = visited.pop(0)
-        currTickets = myTickets.pop(0)
-        currVertex = currPath[-1]
-
-        if len(currTrans) == limitdepth:
-            limit_depth_reached()
-        if exp == limitexp:
-            limit_expanssion_reached()
-
-        if currVertex == goal:
-            done = True
-            continue
-
-        # Also isn't worth if i've been to this position with >= tickets (optimization maybe)
-        for option in myMap[currVertex]:
-            if has_ticket(currTickets, option[0]) and option[1] not in currVisited:
-                exp += 1
-
-                if option[1] == goal:
-                    currPath.append(option[1])
-                    currTrans.append(option[0])
-                    done = True
-                    break
-
-                queue.append( currPath + [option[1]] )
-                transport.append( currTrans + [option[0]] )
-
-                newTickets = currTickets.copy()
-                newTickets[option[0]] += -1
-                myTickets.append(newTickets)
-
-                newVisited = currVisited.copy()
-                newVisited.add(currVertex)
-                visited.append(newVisited)
-
     
-    final = [[[], init]] + [ [[T], [P]] for T, P in zip(currTrans, currPath[1:]) ]
+    final = [[[], init]]
+    path = []
 
-    #print("final2: {}".format(final))
+    for max_depth in range(heuristic[initial][goal], limitdepth+1):
+        path = A_star_limitted(init[0], self._goal[0], tickets, limitexp, max_depth)
+        if path != []:
+            break
 
+    if path == []
+        return []
+
+    final += path
+    print("final2: {}".format(final))
     return final
 
 
