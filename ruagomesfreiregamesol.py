@@ -192,23 +192,36 @@ def search_1agent_lim(self, init, tickets, limitexp, limitdepth):
 # Exercise 3 - Three agents, no tickets limit
 #
 def A_star_3(model, prev_path, init, goal, limitexp, depth):
-    print("depth: {}".format(depth))
     required_depth = depth
     if required_depth == 1:
-        return prev_path + [goal]
+        return [prev_path + [goal]]
 
     paths = []
     for option in model[init]:
         new_step = option[1]
-        print("new_step: {} || goal: {} || heuristic: {}".format(new_step, goal, heuristic[new_step][goal]))
         if heuristic[new_step][goal] <= required_depth - 1:
-            print("new_step: {}".format(new_step))
             paths += A_star_3(model, prev_path + [new_step], new_step, goal, limitexp, required_depth - 1)
+
+
+    print("sub_path: {}".format(paths))
 
     return paths
 
-def valid_combination():
+def valid_combination(Paths, valid_path):
+    valid = True
+    for path0 in Paths[0]:
+        for path1 in Paths[1]:
+            for path2 in Paths[2]:
+                valid = True
+                for i in range(len(path0)):
+                    if path0[i] == path1[i] or path0[i] == path2[i] or path1[i] == path2[i]:
+                        valid = False
+                        break
+                if valid:
+                    valid_path[0] = [path0, path1, path2]
+                    return True
     return False
+
             
 
 def search_3agent_nolim(self, init, limitexp, limitdepth):
@@ -222,13 +235,16 @@ def search_3agent_nolim(self, init, limitexp, limitdepth):
     for agent in range(3):
         Paths[agent] = A_star_3(myMap, [init[agent]], init[agent], goals[agent], limitexp, worst_depth)
 
-    while any( [ p == [] for p in Paths.values() ] ) and not valid_combination() :
+    valid_path = {}
+    while any( [ p == [] for p in Paths.values() ] ) or not valid_combination(Paths, valid_path):
         worst_depth += 1
         for agent in range(3):
             Paths[agent] = A_star_3(myMap, [init[agent]], init[agent], goals[agent], limitexp, worst_depth)
 
+        print("final3: {}".format(Paths))
 
-    print("final3: {}".format(Paths))
+
+    print("final3: {}".format(valid_path))
 
     return []#final
 
