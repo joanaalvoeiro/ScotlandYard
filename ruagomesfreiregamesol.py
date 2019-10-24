@@ -58,7 +58,7 @@ class SearchProblem:
             return search_3agent_nolim(self, init, limitexp, limitdepth)
 
         elif not anyorder:
-            return search_3agent_lim(self, init, tickets, limitexp, limitdepth)
+            return search_3agent_lim(self, self._goal, init, tickets, limitexp, limitdepth)
         else:
             return search_3agent_lim_anyorder(self, init, tickets, limitexp, limitdepth)
 
@@ -94,7 +94,7 @@ def search_1agent_nolim(self, init, limitexp, limitdepth):
     final = [ [[], init] ]
     A_star(self._model, init[0], self._goal[0], limitexp, limitdepth, final)
 
-    print("final1: {}".format(final))
+    #print("final1: {}".format(final))
 
     return final
 
@@ -142,7 +142,9 @@ def search_1agent_lim(self, init, tickets, limitexp, limitdepth):
         return []
 
     final += path
-    print("final2: {}".format(final))
+    
+    #print("final2: {}".format(final))
+    
     return final
 
 
@@ -206,7 +208,7 @@ def search_3agent_nolim(self, init, limitexp, limitdepth):
     
     final = translate_path(valid_path[0][0], valid_path[0][1], valid_path[0][2])
 
-    print("final3: {}".format(final))
+    #print("final3: {}".format(final))
 
     return final
 
@@ -214,14 +216,12 @@ def search_3agent_nolim(self, init, limitexp, limitdepth):
 # Exercise 4 - Three agents, tickets limited
 #
 def translate_path_lim(path0, path1, path2):
-    print("path0: {} || path1: {} || path2: {}".format(path0, path1, path2))
     final = [[[], [path0[0][1], path1[0][1], path2[0][1]] ]]
     for i in range(1, len(path0)):
         final.append( [ [path0[i][0], path1[i][0], path2[i][0]], [path0[i][1], path1[i][1], path2[i][1]] ] )
     return final
 
 def limit_tickets_reached(available_tickets, tickets0, tickets1, tickets2):
-    print("available_tickets: {} || tickets0: {} || tickets1: {} || tickets2: {}".format(available_tickets,tickets0,tickets1,tickets2))
     for i in range(len(available_tickets)):
         if available_tickets[i] < available_tickets[i]*3 - tickets0[i] - tickets1[i] - tickets2[i]:
             return True
@@ -229,16 +229,15 @@ def limit_tickets_reached(available_tickets, tickets0, tickets1, tickets2):
     return False
 
 def valid_combination_3_lim(Paths, available_tickets, valid_path):
-    valid = True
     for path0 in Paths[0]:
         for path1 in Paths[1]:
             for path2 in Paths[2]:
+                valid = True
                 if limit_tickets_reached(available_tickets, path0[-1], path1[-1], path2[-1]):
                     continue
 
-                valid = True
                 for i in range(1, len(path0)-1):
-                    if path0[i] == path1[i] or path0[i] == path2[i] or path1[i] == path2[i]:
+                    if path0[i][1] == path1[i][1] or path0[i][1] == path2[i][1] or path1[i][1] == path2[i][1]:
                         valid = False
                         break
                 if valid:
@@ -254,7 +253,6 @@ def IDA_star_3_lim(model, prev_path, init, goal, tickets, limitexp, depth):
             if has_ticket(tickets, transport):
                 new_tickets = tickets.copy()
                 new_tickets[transport] += -1
-                print("goal: {}".format(goal))
                 possible_finish.append( prev_path + [ [ transport , goal] ] + [new_tickets])
         return possible_finish
 
@@ -269,116 +267,52 @@ def IDA_star_3_lim(model, prev_path, init, goal, tickets, limitexp, depth):
 
     return paths
 
-def search_3agent_lim(self, init, tickets, limitexp, limitdepth):
+def search_3agent_lim(self, goals, init, tickets, limitexp, limitdepth):
     myMap = self._model
-    goals = self._goal
     model = self._model
-
-    print("goals: {}".format(goals))
 
     worst_depth = max( heuristic[init[agent]][goals[agent]] for agent in range(3) )
 
     Paths = {}
     for agent in range(3):
         Paths[agent] = IDA_star_3_lim(myMap, [[[],init[agent]]], init[agent], goals[agent], tickets, limitexp, worst_depth)
-    print("Paths: {}".format(Paths))
+
     valid_path = {}
     while any( [ p == [] for p in Paths.values() ] ) or not valid_combination_3_lim(Paths, tickets, valid_path):
         worst_depth += 1
         for agent in range(3):
             Paths[agent] = IDA_star_3_lim(myMap, [[[],init[agent]]], init[agent], goals[agent], tickets, limitexp, worst_depth)
-        print("Paths: {}".format(Paths))
 
     
     final = translate_path_lim(valid_path[0][0], valid_path[0][1], valid_path[0][2])
 
-    print("final4: {}".format(final))
+    #print("final4: {}".format(final))
 
     return final
 
 #
 # Exercise 5 - Three agents, tickets limited
 #
-def triple_bfs_lim_anyorder(myMap, init, goal, tickets, limitexp, limitdepth):
-    transport = [[[]]]
-    tickets = [tickets]
-
-    goals = [ [a, b, c] for a in goal for b in goal for c in goal if a != b != c != a ]
-
-    done = False
-    queue = [[init]]
-
-    depth = -1
-    configurations = set()
-
-    exp = 0
-    while queue and not done:
-        currTickets = tickets.pop(0)
-        currTrans3 = transport.pop(0)
-        currPath3 = queue.pop(0)
-        currVertexes3 = currPath3[-1]
-
-        if len(currTrans3)-1 == limitdepth:
-            limit_depth_reached()
-        if exp == limitexp:
-            limit_expanssion_reached()
-
-        if currVertexes3 in goals:
-            done = True
-            continue
-
-        possibilities = [ myMap[currVertex] for currVertex in currVertexes3 ]
-        combinations = [ [option1, option2, option3] for option1 in possibilities[0] \
-                        for option2 in possibilities[1] for option3 in possibilities[2] \
-                        if option1[1] != option2[1] != option3[1] != option1[1] \
-                        and (option1[1], option2[1], option3[1]) not in configurations ]
-
-        #print("combinations: {}".format(len(combinations)))
-
-        #print('possibilities: {}\ncombinations: {}\nvalid_combinations: {}'.format(possibilities, combinations, valid_combinations))
-
-        if combinations != []:
-            exp += 1
-
-        for option in combinations:
-            nextPos = [ option[i][1] for i in range(3) ]
-            nextTrans = [ option[i][0] for i in range(3) ]
-            newTickets = currTickets.copy()
-
-            invalid_ticket_n = False
-            for trans_index in nextTrans:
-                newTickets[trans_index] += -1
-                if newTickets[trans_index] < 0:
-                    invalid_ticket_n = True
-
-            if invalid_ticket_n:
-                continue
-
-            configurations.add( ( option[0][1], option[1][1], option[2][1]) )
-
-            if nextPos in goals:
-                currPath3.append(nextPos)
-                currTrans3.append(nextTrans)
-                done = True
-                break
-
-            queue.append( currPath3 + [nextPos] )
-            transport.append( currTrans3 + [nextTrans] )
-            tickets.append( newTickets )
-
-
-    final = [ [T, P] for T, P in zip(currTrans3, currPath3) ]
-
-    return final
 
 
 def search_3agent_lim_anyorder(self, init, tickets, limitexp, limitdepth):
     myMap = self._model
     goals = self._goal
+    model = self._model
 
-    #print('goal is ' + str(goal))
+    possible_goals = [ [a, b, c] for a in goals for b in goals for c in goals if a != b != c != a ]
 
-    final = triple_bfs_lim_anyorder(myMap, init, goals, tickets, limitexp, limitdepth)
+    all_final = [ search_3agent_lim(self, goals, init, tickets, limitexp, limitdepth) for goals in possible_goals ]
+
+    all_final = list(filter(lambda f : f != [], all_final))
+
+    if all_final == []:
+        return []
+
+    final = all_final[0]
+    for i in range(1, len(all_final)):
+        if len(final) > len(all_final[i]):
+            final = all_final[i]
 
     #print("final5: {}".format(final))
 

@@ -156,7 +156,8 @@ else:
 
 tendtotal = time.process_time()
 print("Total time is %.1fms"%((tendtotal-tinittotal)*1000))
-'''
+
+
 # CUSTOM TESTS
 
 print("\n ENTERING CUSTOM TESTS...")
@@ -250,4 +251,3 @@ else:
 tendtotal = time.process_time()
 print("Total time %.1fms"%((tendtotal-tinittotal)*1000))
 
-'''
