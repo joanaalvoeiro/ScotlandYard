@@ -28,14 +28,7 @@ def floyd_warshall(model):
     for i in range(V):
         for option in model[i]:
             h_trans[i][option[1]].append(option[0])
-
-    f = open("heuristic.txt", "w")
-    f.write(str(heuristic))
-    f.close()
-
-    f = open("h_trans.txt", "w")
-    f.write(str(h_trans))
-    f.close()
+            
   
 class SearchProblem:
 
