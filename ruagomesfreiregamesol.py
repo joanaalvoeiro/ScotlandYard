@@ -220,7 +220,7 @@ def search_3agent_nolim(self, init, limitexp, limitdepth):
     worst_depth = max( heuristic[init[agent]][goals[agent]] for agent in range(3) )
 
     paths = []
-    while paths == [] and worst_depth <= limitdepth:
+    while paths == [] and worst_depth <= limitdepth and exp <= limitexp:
         paths = IDA_star_3_no_lim(myMap, init, goals, worst_depth)
         worst_depth += 1
 
@@ -232,6 +232,7 @@ def search_3agent_nolim(self, init, limitexp, limitdepth):
         print("Depth limit exceeded: {}".format(exp))
         final = []
 
+    #print("exp: {}".format(exp))
 
     if exp > limitexp:
         print("Expansion limit exceeded: {}".format(exp))
@@ -239,7 +240,7 @@ def search_3agent_nolim(self, init, limitexp, limitdepth):
 
     exp = 0
 
-    print("final3: {}".format(final))
+    #print("final3: {}".format(final))
 
     return final
 
@@ -301,7 +302,7 @@ def search_3agent_lim(self, goals, init, tickets, limitexp, limitdepth):
     worst_depth = max( heuristic[init[agent]][goals[agent]] for agent in range(3) )
 
     paths = []
-    while paths == [] and worst_depth <= limitdepth:
+    while paths == [] and worst_depth <= limitdepth and exp <= limitexp:
         paths = IDA_star_3_lim(myMap, init, goals, tickets, worst_depth)
         worst_depth += 1
 
@@ -318,7 +319,7 @@ def search_3agent_lim(self, goals, init, tickets, limitexp, limitdepth):
         print("Expansion limit exceeded: {}".format(exp))
         final = []
 
-    print("exp: {}".format(exp))
+    #print("exp: {}".format(exp))
 
     exp = 0
 
@@ -352,11 +353,18 @@ def search_3agent_lim_anyorder(self, init, tickets, limitexp, limitdepth):
     for i in range(1, limitdepth+1):
         for goal in worst_dict[i]:
             paths = IDA_star_3_lim(myMap, init, goal, tickets, i)
-            if paths == []:
-                worst_dict[i+1] += [goal]
-            else:
+            worst_dict[i+1] += [goal]
+
+            if exp > limitexp:
+                paths = []
                 break
-        if paths != []:
+            if paths != []:
+                break
+
+        if exp > limitexp:
+            paths = []
+            break
+        elif paths != []:
                 break
 
     final = []
@@ -372,7 +380,7 @@ def search_3agent_lim_anyorder(self, init, tickets, limitexp, limitdepth):
         print("Expansion limit exceeded: {}".format(exp))
         final = []
 
-    print("exp: {}".format(exp))
+    #print("exp: {}".format(exp))
 
     exp = 0
 
