@@ -67,7 +67,7 @@ exp = 0
 #
 # Exercise 1 - One agent, no tickets limit
 #
-def A_star(model, init, goal, limitdepth, final):
+def solver_1a_nolim(model, init, goal, limitdepth, final):
     global exp
     exp += 1
     required_depth = heuristic[init][goal]
@@ -79,7 +79,7 @@ def A_star(model, init, goal, limitdepth, final):
         new_step = option[1]
         if heuristic[new_step][goal] == required_depth - 1:
             final.append([[ option[0] ], [new_step]])
-            A_star(model, new_step, goal, limitdepth, final)
+            solver_1a_nolim(model, new_step, goal, limitdepth, final)
             return
 
 def search_1agent_nolim(self, init, limitexp, limitdepth):
@@ -92,7 +92,7 @@ def search_1agent_nolim(self, init, limitexp, limitdepth):
     exp = 0
 
     final = [ [[], init] ]
-    A_star(self._model, init[0], self._goal[0], limitdepth, final)
+    solver_1a_nolim(self._model, init[0], self._goal[0], limitdepth, final)
 
     if exp > limitexp:
         print("Expansion limit exceeded: {}".format(exp))
@@ -115,7 +115,7 @@ def has_ticket(tickets, *types):
     return tickets[0] >= cost[0] and tickets[1] >= cost[1] and tickets[2] >= cost[2]
 
 
-def IDA_star(model, init, goal, tickets, max_depth):
+def solver_1a_lim(model, init, goal, tickets, max_depth):
     global exp
     exp += 1
     required_depth = max_depth
@@ -131,7 +131,7 @@ def IDA_star(model, init, goal, tickets, max_depth):
         if heuristic[new_step][goal] <= required_depth - 1 and has_ticket(tickets, transport):
             new_tickets = tickets.copy()
             new_tickets[transport] += -1
-            path = IDA_star(model, new_step, goal, new_tickets, required_depth-1)
+            path = solver_1a_lim(model, new_step, goal, new_tickets, required_depth-1)
 
             if path != []:
                 return [ [[ transport ], [new_step]] ] + path
@@ -148,7 +148,7 @@ def search_1agent_lim(self, init, tickets, limitexp, limitdepth):
     global exp
     exp = 0
     for max_depth in range(heuristic[initial][goal], limitdepth+1):
-        path = IDA_star(self._model, init[0], self._goal[0], tickets, max_depth)
+        path = solver_1a_lim(self._model, init[0], self._goal[0], tickets, max_depth)
         if path != []:
             break
 
@@ -171,7 +171,7 @@ def search_1agent_lim(self, init, tickets, limitexp, limitdepth):
 #
 # Exercise 3 - Three agents, no ticket limit
 #
-def IDA_star_3_no_lim(model, init, goal, depth):
+def solver_3a_nolim(model, init, goal, depth):
     global exp
     exp += 1
     required_depth = depth
@@ -203,7 +203,7 @@ def IDA_star_3_no_lim(model, init, goal, depth):
                 if heuristic[new_step2][goal[2]] <= required_depth - 1 and new_step0 != new_step2 != new_step1:
                     new_init = [new_step0, new_step1,new_step2]
                     trans = [trans0, trans1, trans2]
-                    paths = IDA_star_3_no_lim(model, new_init, goal, required_depth - 1)
+                    paths = solver_3a_nolim(model, new_init, goal, required_depth - 1)
                     if paths != []:
                         return [[trans, new_init]] + paths
 
@@ -221,7 +221,7 @@ def search_3agent_nolim(self, init, limitexp, limitdepth):
 
     paths = []
     while paths == [] and worst_depth <= limitdepth and exp <= limitexp:
-        paths = IDA_star_3_no_lim(myMap, init, goals, worst_depth)
+        paths = solver_3a_nolim(myMap, init, goals, worst_depth)
         worst_depth += 1
 
     final = []
@@ -247,7 +247,7 @@ def search_3agent_nolim(self, init, limitexp, limitdepth):
 #
 # Exercise 4 - Three agents, tickets limited
 #
-def IDA_star_3_lim(model, init, goal, tickets, depth):
+def solver_3a_lim(model, init, goal, tickets, depth):
     global exp
     exp += 1
     required_depth = depth
@@ -286,7 +286,7 @@ def IDA_star_3_lim(model, init, goal, tickets, depth):
                     new_tickets[trans1] += -1
                     new_tickets[trans2] += -1
 
-                    paths = IDA_star_3_lim(model, new_init, goal, new_tickets, required_depth - 1)
+                    paths = solver_3a_lim(model, new_init, goal, new_tickets, required_depth - 1)
                     if paths != []:
                         return [[trans, new_init]] + paths
 
@@ -303,7 +303,7 @@ def search_3agent_lim(self, goals, init, tickets, limitexp, limitdepth):
 
     paths = []
     while paths == [] and worst_depth <= limitdepth and exp <= limitexp:
-        paths = IDA_star_3_lim(myMap, init, goals, tickets, worst_depth)
+        paths = solver_3a_lim(myMap, init, goals, tickets, worst_depth)
         worst_depth += 1
 
     final = []
@@ -352,7 +352,7 @@ def search_3agent_lim_anyorder(self, init, tickets, limitexp, limitdepth):
     paths = []
     for i in range(1, limitdepth+1):
         for goal in worst_dict[i]:
-            paths = IDA_star_3_lim(myMap, init, goal, tickets, i)
+            paths = solver_3a_lim(myMap, init, goal, tickets, i)
             worst_dict[i+1] += [goal]
 
             if exp > limitexp:
