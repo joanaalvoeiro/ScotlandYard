@@ -1,3 +1,4 @@
+Total time 356.3ms
 
 (2 val) Exercise 1 - One agent, No limits
 Init: [30] - Goal: [56]
@@ -32,7 +33,7 @@ Init: [30,40,109] - Goal: [61,60,71]
 exp: 11
 Time: 0.1ms
 Path: [[[], [30, 40, 109]], [[0, 2, 1], [46, 72, 84]], [[0, 2, 1], [45, 60, 63]], [[1, 0, 0], [63, 61, 70]]]
-Total time is 323.2ms
+Total time is 356.8ms
 
  ENTERING CUSTOM TESTS...
 
@@ -71,4 +72,4 @@ Init [57, 38, 112] - Goal [16, 108, 70]
 exp: 6
 Time: 0.0ms
 Path: [[[], [57, 38, 112]], [[0, 0, 0], [56, 40, 111]], [[2, 2, 1], [72, 13, 97]], [[2, 2, 1], [109, 30, 83]], [[0, 0, 0], [98, 17, 84]], [[0, 0, 0], [108, 16, 70]]]
-Total time 323.7ms
+Total time 357.4ms
